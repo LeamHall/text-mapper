@@ -122,7 +122,7 @@ sub system {
   $tech += 1 if $government == 0 or $government == 5;
   $tech -= 2 if $government == 13; # D
   $tech = 0 if $tech < 0;
-  my $gas_giant = roll1d6() <= 9;
+  my $gas_giant = roll2d6() <= 9;
   my $name = $self->compute_name();
   $name = uc($name) if $population >= 9;
   my $uwp = join("", $starport, map { code($_) } $size, $atmosphere, $hydro, $population, $government, $law) . "-" . code($tech);
@@ -192,9 +192,22 @@ sub system {
 	   or $government == 7
 	   or $government == 10
 	   or $law >= 9);
+  push(@tiles, "System is " . planet_count($gas_giant));
   # last is the name
   push(@tiles, qq{name="$name"}, qq{uwp="$uwp"});
   return \@tiles;
+}
+
+sub planet_count {
+  # Adds to the outer count if there is a gas giant.
+  # Each band has its own frequency of planets, which can 
+  #   be adjusted.
+  my ( $gas_giant ) = @_; 
+  my $inner     = int(rand(3));
+  my $habitable = int(rand(3)) + 1;
+  my $outer     = int(rand(3));
+  $outer++ if $gas_giant;
+  return join('.', $inner, $habitable, $outer );
 }
 
 sub code {
